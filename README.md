@@ -17,7 +17,8 @@ Take a look at the features in the video! https://youtu.be/u9dnNvEjVbw
 Implementation Description
 ==========================
 
-This repo shows the source for the backend of the application, which provide RESTful API web services for the mobile client. The following backend technologies were used:
+This repo shows the source for the backend of the application, which provide RESTful API web services for the mobile client. You can take a look at the RESTful API here: http://usccampusfood.elasticbeanstalk.com/restapi.mvc. Unfortunately, the DB is down at the time...
+The following backend technologies were used:
 ```
 Server technology: Java
 Server: Tomcat 7 
