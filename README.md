@@ -26,6 +26,7 @@ Data Access Layer: This layer contains object relational mapping between databas
 SQL Mapper Layer: Plain SQL is written in this layer in MyBatis Mappers to implement logic to manipulating and processing data in and out of
 the databse.
 ```
+![alt tag](https://github.com/Jlong89/icampusfood.git/imgs/backend_structure.png)
 
 
 
