@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.cs587.icampusfood.persistence.businessMappers.WeekCrowdednessMapper">
+
+    <resultMap type="com.cs587.icampusfood.persistence.dataObjects.WeekCrowdednessDBDO" id="genericWeekCrowdednessResultType">
+        <result column="rowNo" property ="rownum" />
+        <result column="crowdedness" property ="crowdedness" />
+        <result column="dow" property ="dow" />
+        <result column="hour" property ="hour" />
+    </resultMap>
+
+    <select id="getWeekCrowdedness" parameterType="map" resultMap="genericWeekCrowdednessResultType">
+        select   row_number() over (order by b.dow nulls last) as rownum, *
+        from     (select avg(a."crowdedness") as crowdedness, a.dow, a.hour from (select "locationId", "foodRating", "serviceRating", "crowdedness", extract(hour from "postTime") as hour, extract(dow from "postTime") as dow from "Posts" where "locationId" = #{locationId}) as a
+        group by  a.hour, a.dow order by a.dow desc) b
+        order by b.dow, b.hour
+    </select>
+
+
+
+</mapper>
+

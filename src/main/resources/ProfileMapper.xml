@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.cs587.icampusfood.persistence.businessMappers.ProfileMapper">
+
+    <resultMap type="com.cs587.icampusfood.persistence.dataObjects.ProfileDBDO" id="genericProfileType">
+        <result column="foodType" property ="foodType" />
+        <result column="rating" property ="rating" />
+    </resultMap>
+
+    <select id="getProfile" parameterType="map" resultMap="genericProfileType">
+    select * from (
+	select "foodType", avg(avgFoodRating) as rating from (
+	SELECT "name", "foodType", case when "avgFoodRating" is null or "avgFoodRating" = -1 then 0 else
+	"avgFoodRating" end as avgFoodRating, ST_Distance("location", st_makepoint(#{longitude},#{latitude}))
+	FROM "FoodLocation"
+	WHERE
+	ST_DWithin("location", ST_Makepoint(#{longitude},#{latitude}), #{radius}, false)) as candidates
+	GROUP BY "foodType") as rated
+	where rating = (select max(rating) from (
+					select "foodType", avg(avgFoodRating) as rating from (
+					SELECT "name", "foodType", case when "avgFoodRating" is null or "avgFoodRating" = -1 then 0 else
+					"avgFoodRating" end as avgFoodRating, ST_Distance("location", st_makepoint(#{longitude},#{latitude}))
+					FROM "FoodLocation"
+					WHERE
+					ST_DWithin("location", ST_Makepoint(#{longitude},#{latitude}), #{radius}, false)) as candidates
+					GROUP BY "foodType") as rated)
+    </select>
+
+
+
+</mapper>
+

@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.cs587.icampusfood.persistence.businessMappers.FoodLocationMapper">
+
+    <resultMap type="com.cs587.icampusfood.persistence.dataObjects.FoodLocationDBDO" id="genericFoodLocationType">
+        <result column="locationId" property ="locationId" />
+        <result column="name" property="name"/>
+        <result column="foodType" property="foodType"/>
+        <result column="avgFoodRating" property="avgFoodRating"/>
+        <result column="avgServiceRating" property="avgServiceRating"/>
+        <result column="avgCrowdedness" property="avgCrowdedness"/>
+        <result column="openTime" property="openTime"/>
+        <result column="closeTime" property="closeTime"/>
+        <result column="startDate" property="startDate"/>
+        <result column="endDate" property="endDate"/>
+        <result column="location" property="location"/>
+    </resultMap>
+
+    <select id="isFriendFavorite" parameterType="map" resultType="java.lang.Boolean">
+        select exists(select "masterFriend", "slaveFriend" from "Users" u join "Friends" f on u."userName"=f."masterFriend"
+        join "Favorites" fav on f."slaveFriend" = fav."userName"
+        join "FoodLocation" loc on loc."locationId" = #{locationId}
+        where u."userName" = #{userName});
+    </select>
+
+
+
+    <select id="getKBestWithinRange" parameterType="map" resultMap="genericFoodLocationType">
+         SELECT "name",
+        "locationId",
+        "foodType",
+        "avgFoodRating",
+        "avgServiceRating",
+        "avgCrowdedness",
+        "openTime",
+        "closeTime",
+        "startDate",
+        "endDate",
+        "location",
+        ST_Distance("location", st_makepoint(#{longitude},#{latitude}), false) as distance
+        FROM "FoodLocation" WHERE "foodType" = #{foodType}
+        and ST_DWithin("location", ST_Makepoint(#{longitude},#{latitude}), #{radius}, false)
+        ORDER BY "avgFoodRating" desc
+        LIMIT #{k};
+    </select>
+    
+
+
+    <select id="getLocsWithinRange" parameterType="map" resultMap="genericFoodLocationType">
+      SELECT
+          *
+        FROM
+          "FoodLocation"
+        WHERE
+           ST_DWithin(
+        "location",#{point}, #{radius}, false)
+    </select>
+
+    <resultMap type="com.cs587.icampusfood.persistence.dataObjects.FoodLocationDBDO" id="foodLocationWithDistType">
+        <result column="locationId" property ="locationId" />
+        <result column="name" property="name"/>
+        <result column="foodType" property="foodType"/>
+        <result column="avgFoodRating" property="avgFoodRating"/>
+        <result column="avgServiceRating" property="avgServiceRating"/>
+        <result column="avgCrowdedness" property="avgCrowdedness"/>
+        <result column="openTime" property="openTime"/>
+        <result column="closeTime" property="closeTime"/>
+        <result column="startDate" property="startDate"/>
+        <result column="endDate" property="endDate"/>
+        <result column="distance" property="distance"/>
+        <result column="location" property="location"/>
+    </resultMap>
+
+    <select id="getKnn" parameterType="map" resultMap="foodLocationWithDistType">
+        SELECT
+        "name",
+        "locationId",
+        "foodType",
+        "avgFoodRating",
+        "avgServiceRating",
+        "avgCrowdedness",
+        "openTime",
+        "closeTime",
+        "startDate",
+        "endDate",
+        "location",
+        ST_Distance("location", st_makepoint(#{longitude},#{latitude}), false) as distance
+        FROM "FoodLocation"
+        WHERE
+        ST_DWithin("location", ST_Makepoint(#{longitude}, #{latitude}), #{radius}, false)
+        ORDER BY "location" &#60;-> st_makepoint(#{longitude}, #{latitude})
+        LIMIT #{k}
+    </select>
+
+
+    <select id ="getLocsWithinRangeTime" resultMap="foodLocationWithDistType">
+        SELECT
+        "name",
+        "locationId",
+        "foodType",
+        "avgFoodRating",
+        "avgServiceRating",
+        "avgCrowdedness",
+        "openTime",
+        "closeTime",
+        "startDate",
+        "endDate",
+        "location",
+        ST_Distance("location", st_makepoint(#{longitude},#{latitude}), false) as distance
+        FROM "FoodLocation"
+        WHERE
+        ST_DWithin("location", ST_Makepoint(#{longitude}, #{latitude}), #{radius}, false)
+        and
+        pg_catalog.time(to_timestamp(#{time}, 'DD/MM/YYYY hh24:mi:ss')) between pg_catalog.time("openTime") and pg_catalog.time("closeTime")
+        ORDER BY "location" &#60;-> st_makepoint(#{longitude}, #{latitude})
+        LIMIT #{k}
+
+    </select>
+    
+
+</mapper>
+
